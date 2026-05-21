@@ -184,7 +184,6 @@ finally:
 ```
 
 Screenshot grafu z InfluxDB:
-Data byla úspěšně uložena.
 ![](image2.png)
 ## 5. Webová aplikace a vizualizace
 
@@ -199,7 +198,7 @@ python3 app.py
 
 V terminálu se zobrazí adresa, na které běží stránka. Po otevření by měla vypadat následovně:
 ![](image3.png)
-Tady je Frontend kód:
+Tady je frontend kód:
 
 ```html
 <!DOCTYPE html>
