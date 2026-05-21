@@ -182,6 +182,7 @@ finally:
     write_client.close()
     print("InfluxDB connection closed.")
 ```
+Screenshot of InfluxDB graph:
 
 ![](image2.png)
 ## 5. Web Application and Visualization
