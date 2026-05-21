@@ -184,9 +184,8 @@ finally:
 ```
 
 Screenshot grafu z InfluxDB:
-![](image2.png)
 Data byla úspěšně uložena.
-
+![](image2.png)
 ## 5. Webová aplikace a vizualizace
 
 Backend webové aplikace jsem uložil do složky `muj_dashboard` a Frontend do podsložky `templates`.
