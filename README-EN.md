@@ -41,7 +41,7 @@ The GPIO wiring uses the following pins:
 - 25 — GND
 - 27 — DNC
 - 28 — DNC
-
+![](image1.png)
 I found the sensor address using the command:
 ```bash
 sudo i2cdetect -y 1
@@ -183,10 +183,7 @@ finally:
     print("InfluxDB connection closed.")
 ```
 
-Screenshot of the InfluxDB graph:
-
-Data was successfully stored.
-
+![](image2.png)
 ## 5. Web Application and Visualization
 
 I saved the web application backend to the `muj_dashboard` folder and the Frontend to the `templates` subfolder.
@@ -199,8 +196,8 @@ python3 app.py
 ```
 
 The terminal will display the address where the page is running. After opening it should look like this:
-
-Here is the Frontend code:
+![](image3.png)
+Here is the frontend code:
 
 ```html
 <!DOCTYPE html>
