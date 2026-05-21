@@ -183,7 +183,6 @@ finally:
     print("Spojení s InfluxDB uzavřeno.")
 ```
 
-Screenshot grafu z InfluxDB
 ![Screenshot grafu z InfluxDB](image2.png)
 ## 5. Webová aplikace a vizualizace
 
