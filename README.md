@@ -183,8 +183,8 @@ finally:
     print("Spojení s InfluxDB uzavřeno.")
 ```
 
-Screenshot grafu z InfluxDB:
-![](image2.png)
+Screenshot grafu z InfluxDB
+![Screenshot grafu z InfluxDB](image2.png)
 ## 5. Webová aplikace a vizualizace
 
 Backend webové aplikace jsem uložil do složky `muj_dashboard` a Frontend do podsložky `templates`.
