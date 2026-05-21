@@ -41,7 +41,7 @@ Na GPIO to je zapojeno na následujících pinech:
 - 25 — GND
 - 27 — DNC
 - 28 — DNC
-
+![Zapojení](image1.png)
 Adresu snímače jsem zjistil příkazem:
 ```bash
 sudo i2cdetect -y 1
@@ -184,7 +184,7 @@ finally:
 ```
 
 Screenshot grafu z InfluxDB:
-
+![](image2.png)
 Data byla úspěšně uložena.
 
 ## 5. Webová aplikace a vizualizace
@@ -199,7 +199,7 @@ python3 app.py
 ```
 
 V terminálu se zobrazí adresa, na které běží stránka. Po otevření by měla vypadat následovně:
-
+![](image3.png)
 Tady je Frontend kód:
 
 ```html
