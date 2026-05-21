@@ -1,13 +1,19 @@
 # IoT čidlo teploty a vlhkosti s webovou vizualizací
 
 ## 1. Instalace Raspberry Pi OS
+Nejdříve je potřeba připravit SD kartu nebo jiné podporované úložné médium. Poté si z oficiálních stránek Raspberry Pi stáhněte aplikaci Raspberry Pi Imager:
+[Oficiální stránky Raspberry Pi](https://www.raspberrypi.com/software/)
+Po spuštění programu vyberete typ svého Raspberry Pi, verzi operačního systému a úložné médium, na které se bude systém nahrávat. Následně si můžete systém předem přizpůsobit jako například nastavit uživatelské jméno, heslo nebo připojení k Wi-Fi.
 
-Aktualizace systému:
+Jakmile budete mít vše nastavené, spusťte zápis systému na médium. Po dokončení vložte SD kartu do Raspberry Pi a zapněte zařízení. Poté už jen projdete úvodním nastavením systému Raspberry Pi OS.
+
+Po nabootování systému a zobrazení pracovní plochy je vhodné nejprve aktualizovat celý systém:
+
 ```bash
 sudo apt update && sudo apt full-upgrade -y
 ```
 
-Nastavení SSH:
+Dále je potřeba povolit SSH, aby bylo možné Raspberry Pi spravovat vzdáleně:
 ```bash
 sudo systemctl enable ssh
 sudo systemctl start ssh
@@ -48,9 +54,8 @@ sudo i2cdetect -y 1
 ```
 
 Pomocí Gemini jsem vygeneroval kód — zadal jsem mu správné zapojení drátků a adresu snímače (0x44). Kód potvrdil, že snímač se Raspberry Pi komunikuje správně.
-
-Snímač 1 komunikuje.  
-Snímač 2 nekomunikuje a přehřívá se.
+ 
+Pokud vám to hází chybu tak zkontrolujte adresu snímače a zkuste to znovu.
 
 ## 3. Sběr dat
 
