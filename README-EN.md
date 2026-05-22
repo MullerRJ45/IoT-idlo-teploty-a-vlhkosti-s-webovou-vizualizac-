@@ -188,7 +188,7 @@ try:
             print(f"   Failed to write to DB: {e_db}")
             
         print("-" * 55)
-        time.sleep(2)
+        time.sleep(10)
 
 except KeyboardInterrupt:
     print("\nMeasurement stopped by user.")
