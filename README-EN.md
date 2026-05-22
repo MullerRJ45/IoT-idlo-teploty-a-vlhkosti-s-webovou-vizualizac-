@@ -53,9 +53,9 @@ I found the sensor's address using:
 sudo i2cdetect -y 1
 ```
 
-I used Gemini to generate the code — I gave it the correct wiring and the sensor address (0x44). The code confirmed that the sensor and Raspberry Pi are communicating correctly.
+I used Gemini to generate the code and i just gave it the correct wiring and the sensor address (0x44). The code confirmed that the sensor and Raspberry Pi are communicating correctly.
 
-If you're getting an error, double-check the sensor address and try again.
+If you're getting an error, doublecheck the sensor address and try again.
 
 ## 3. Data Collection
 
@@ -125,7 +125,7 @@ Proposed data structure:
 | Field | Humidity | 45.2 decimal number | Used to draw graphs based on value |
 | Timestamp | Auto-generated | time | Exact time when the measurement occurred |
 
-Start InfluxDB with `sudo systemctl start influxdb` and verify it's running with `sudo systemctl status influxdb`. If the service is active, log into the web interface at `http://localhost:8086` — that's for when you're accessing it directly from the Raspberry Pi. If you're accessing it from another device, make sure both are on the same network. You can find the Raspberry Pi's IP address by running `hostname -I` on it, then enter `http://(YourIP):8086` in your browser.
+Start InfluxDB with `sudo systemctl start influxdb` and verify it's running with `sudo systemctl status influxdb`. If the service is active, log into the web interface at `http://localhost:8086` that's for when you're accessing it directly from the Raspberry Pi. If you're accessing it from another device, make sure both are on the same network. You can find the Raspberry Pi's IP address by running `hostname -I` on it, then enter `http://(YourIP):8086` in your browser.
 
 Then, in the terminal, start Python with `python3` and paste in the following code:
 
