@@ -47,7 +47,7 @@ I found the sensor address using the command:
 sudo i2cdetect -y 1
 ```
 
-I generated the code using Gemini — I provided the correct wiring and sensor address (0x44). The code confirmed that the sensor is communicating with the Raspberry Pi correctly.
+I generated the code using Gemini and provided the correct wiring and sensor address (0x44). The code confirmed that the sensor is communicating with the Raspberry Pi correctly.
 
 Sensor 1 is communicating.  
 Sensor 2 is not communicating and is overheating.
