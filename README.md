@@ -518,6 +518,18 @@ sudo systemctl enable meteoweb.service
 sudo systemctl start meteologger.service
 sudo systemctl start meteoweb.service
 ```
+## 7. API pro dotazování přes web
 
-To je vše, hodně štěstí.
+
+
+
+
+
+
+
+
+
+
+
+
 
