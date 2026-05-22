@@ -125,8 +125,7 @@ Návrh struktury:
 | Field | Vlhkost | 45.2 desetinné číslo | Podle hodnoty kreslí grafy |
 | Timestamp | Automaticky generován | čas | Přesný čas kdy k měření došlo |
 
-InfluxDB spustíme příkazem `sudo systemctl start influxdb` a ověříme, zda běží pomocí `sudo systemctl status influxdb`. Pokud je služba aktivní, přihlásíme se do webového rozhraní na `http://localhost:8086` — to platí v případě, že přistupujeme přímo z Raspberry Pi.
-
+InfluxDB spustíme příkazem `sudo systemctl start influxdb` a ověříme, zda běží pomocí `sudo systemctl status influxdb`. Pokud je služba aktivní, přihlásíme se do webového rozhraní na `http://localhost:8086` ale to platí v případě, že přistupujeme přímo z Raspberry Pi. Pokud přistupujeme z jiného zařízení, ujistíme se, že jsme na stejné síti. IP adresu Raspberry Pi zjistíme příkazem ```hostname -I``` a poté zadáme do prohlížeče adresu: `http://(VaseIP):8086`
 Poté v terminálu spustíme Python příkazem `python3` a vložíme následující kód:
 
 ```python
@@ -499,7 +498,7 @@ WantedBy=multi-user.target
 
 Soubor uložíme a zavřeme.
 
-Nyní poslední krok — do terminálu napíšeme:
+Nyní poslední krok, do terminálu napíšeme:
 
 ```bash
 sudo systemctl daemon-reload
