@@ -54,7 +54,19 @@ sudo i2cdetect -y 1
 ```
 
 Pomocí Gemini jsem vygeneroval kód a zadal jsem mu správné zapojení drátků a adresu snímače (0x44). Kód potvrdil, že snímač se Raspberry Pi komunikuje správně.
- 
+```python
+import time
+from smbus2 import SMBus
+
+with SMBus(1) as bus:
+    bus.write_i2c_block_data(0x44, 0x2C, [0x06])
+    time.sleep(0.05)
+    data = bus.read_i2c_block_data(0x44, 0x00, 6)
+   
+    # Převede každé číslo na HEX a spojí je mezerou
+    hex_data = " ".join(f"{b:02X}" for b in data)
+    print("Surová HEX data:", hex_data)
+ ```
 Pokud vám to hází chybu tak zkontrolujte adresu snímače a zkuste to znovu.
 
 ## 3. Sběr dat
