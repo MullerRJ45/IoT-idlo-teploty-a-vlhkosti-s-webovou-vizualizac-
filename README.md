@@ -63,7 +63,6 @@ with SMBus(1) as bus:
     time.sleep(0.05)
     data = bus.read_i2c_block_data(0x44, 0x00, 6)
    
-    # Převede každé číslo na HEX a spojí je mezerou
     hex_data = " ".join(f"{b:02X}" for b in data)
     print("Surová HEX data:", hex_data)
  ```
