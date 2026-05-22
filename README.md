@@ -53,7 +53,7 @@ Adresu snímače jsem zjistil příkazem:
 sudo i2cdetect -y 1
 ```
 
-Pomocí Gemini jsem vygeneroval kód — zadal jsem mu správné zapojení drátků a adresu snímače (0x44). Kód potvrdil, že snímač se Raspberry Pi komunikuje správně.
+Pomocí Gemini jsem vygeneroval kód a zadal jsem mu správné zapojení drátků a adresu snímače (0x44). Kód potvrdil, že snímač se Raspberry Pi komunikuje správně.
  
 Pokud vám to hází chybu tak zkontrolujte adresu snímače a zkuste to znovu.
 
