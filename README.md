@@ -574,7 +574,7 @@ Změna v backendu
 /api/historie přijímá dotazy ?start=...&end=... relativní jako -týden nebo konkrétní datum pro vlastní rozsah
 Nová funkce urcit_window() automaticky volí okno (5 min → 1 hod → 6 hod → 1 den) podle délky zvoleného období a data se nezahlcují ani pro roční pohled
 
-
+Backend:
 ```python
 from flask import Flask, render_template, jsonify, request
 from influxdb_client import InfluxDBClient
@@ -691,6 +691,7 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 
 ```
+Frontend:
 ```HTML
 <!DOCTYPE html>
 <html lang="cs">
