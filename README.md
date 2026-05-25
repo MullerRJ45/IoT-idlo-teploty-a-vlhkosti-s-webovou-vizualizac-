@@ -520,6 +520,48 @@ sudo systemctl start meteoweb.service
 ```
 ## 7. API pro dotazování přes web
 
+V kódu pro moji webovou aplikaci (app.py) funguje takzvané Web API. Je to vlastně takový překladatel mezi databází InfluxDB a webovou stránkou. Webová stránka totiž neumí číst data z databáze napřímo. Proto posílá dotazy na Flask server a ten jí data z InfluxDB posílá zpátky jako čistý text ve formátu JSON.
+
+V Pythonu pro web mám dvě adresy (app.py), na které se může ptát:
+```python
+@app.route('/api/data')
+def api_data():
+    return jsonify(ziskej_aktualni_data())
+
+@app.route('/api/historie')
+def api_historie():
+    return jsonify(ziskej_historii())
+    ```
+/api/data – Na téhle adrese web dostane úplně poslední naměřenou teplotu a vlhkost z databáze.
+
+/api/historie – Tady web dostane seznam posledních 100 měření za celých 24 hodin, aby měl z čeho nakreslit graf.
+
+(index.html)
+Webová stránka se na tyhle dvě adresy sama ptá na pozadí pomocí JavaScriptu a funkce fetch. Díky tomu se data mění sama a člověk nemusí pořád mačkat F5 pro obnovení stránky:
+```javascript
+async function aktualizujAktualniData() {
+    try {
+        const response = await fetch('/api/data');
+        const data = await response.json();
+        document.getElementById('temp').innerText = data.teplota;
+        document.getElementById('hum').innerText = data.vlhkost;
+        document.getElementById('time').innerText = new Date().toLocaleTimeString('cs-CZ');
+    } catch (e) { console.error(e); }
+}
+```
+Aby se čísla a graf načetly hned po otevření stránky a pak se samy pravidelně aktualizovaly, mám na samém konci JavaScriptu tyto příkazy:
+
+```javascript
+aktualizujAktualniData();
+aktualizujGraf();
+
+setInterval(aktualizujAktualniData, 3000);
+setInterval(aktualizujGraf, 10000);
+```
+První dva řádky spustí funkce a načtou data hned při otevření webu. Příkazy setInterval pak dělají to, že se stránka každé 3 sekundy znovu automaticky zeptá přes API na adresu /api/data pro nová čísla a každých 10 sekund na adresu /api/historie pro aktualizaci grafu.
+
+
+
 
 
 
