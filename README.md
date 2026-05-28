@@ -1202,8 +1202,8 @@ services:
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: 
-      POSTGRES_PASSWORD: 
+      POSTGRES_USER: vaseuzivatelskejmeno
+      POSTGRES_PASSWORD: vaseheslo
       POSTGRES_DB: moje_databaze
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -1249,8 +1249,8 @@ app = Flask(__name__)
 DB_CONFIG = {
     "host": "db",
     "database": "moje_databaze",
-    "user": "",
-    "password": "",
+    "user": "vaseuzivatelskejmeno",
+    "password": "vaseheslo",
     "port": 5432
 }
 
@@ -1332,8 +1332,8 @@ import psycopg2
 DB_CONFIG = {
     "host": "127.0.0.1",
     "database": "moje_databaze",
-    "user": "",
-    "password": "",
+    "user": "vaseuzivatelskejmeno",
+    "password": "vaseheslo",
     "port": 5432
 }
 
