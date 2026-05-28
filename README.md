@@ -1235,7 +1235,7 @@ CREATE TABLE IF NOT EXISTS klima_senzory (
 );
 EOF
  ```
-Fontend použijeme z kódu určený pro influxdb a bude umístěn (~/postgre/templates/)
+Frontend použijeme z kódu určený pro influxdb a bude umístěn (~/postgre/templates/)
 Backend: 
 ```python
 cat << 'EOF' > app.py
