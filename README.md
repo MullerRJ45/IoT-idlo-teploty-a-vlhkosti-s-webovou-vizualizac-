@@ -1239,10 +1239,11 @@ Fontend použijeme z kódu určený pro influxdb a bude umístěn (~/postgre/tem
 Backend: 
 ```python
 cat << 'EOF' > app.py
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+import re
 
 app = Flask(__name__)
 
@@ -1253,6 +1254,45 @@ DB_CONFIG = {
     "password": "vaseheslo",
     "port": 5432
 }
+
+def urcit_interval(start_str, end_str):
+    now = datetime.now(timezone.utc)
+    try:
+        if start_str.startswith("-"):
+            match = re.match(r"-(\d+)([mhdwy])", start_str)
+            if match:
+                val = int(match.group(1))
+                jednotky = {"m": 60, "h": 3600, "d": 86400, "w": 604800, "y": 31536000}
+                trvani = val * jednotky.get(match.group(2), 3600)
+            else:
+                trvani = 86400
+        else:
+            start_dt = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+            end_dt = now if end_str in ("now()", "now") else datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+            trvani = (end_dt - start_dt).total_seconds()
+    except Exception:
+        trvani = 86400
+
+    if trvani <= 2 * 86400:
+        return "5 minutes"
+    elif trvani <= 14 * 86400:
+        return "1 hour"
+    elif trvani <= 60 * 86400:
+        return "6 hours"
+    else:
+        return "1 day"
+
+def preved_start(start_str):
+    now = datetime.now(timezone.utc)
+    if start_str.startswith("-"):
+        match = re.match(r"-(\d+)([mhdwy])", start_str)
+        if match:
+            val = int(match.group(1))
+            jednotky = {"m": "minutes", "h": "hours", "d": "days", "w": "weeks"}
+            jednotka = jednotky.get(match.group(2))
+            if jednotka:
+                return now - timedelta(**{jednotka: val})
+    return datetime.fromisoformat(start_str.replace("Z", "+00:00"))
 
 @app.route('/')
 def index():
@@ -1275,23 +1315,34 @@ def get_data():
 
 @app.route('/api/historie')
 def get_historie():
+    start_str = request.args.get('start', '-24h')
+    end_str = request.args.get('end', 'now()')
+
     try:
+        interval = urcit_interval(start_str, end_str)
+        start_dt = preved_start(start_str)
+
+        if end_str in ("now()", "now"):
+            end_dt = datetime.now(timezone.utc)
+        else:
+            end_dt = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("""
-            SELECT cas, teplota, vlhkost 
-            FROM (
-                SELECT cas, teplota, vlhkost 
-                FROM klima_senzory 
-                ORDER BY cas DESC 
-                LIMIT 1000
-            ) sub 
+        cur.execute(f"""
+            SELECT
+                date_trunc('{interval.split()[1]}', cas) AS cas,
+                ROUND(AVG(teplota)::numeric, 1) AS teplota,
+                ROUND(AVG(vlhkost)::numeric, 1) AS vlhkost
+            FROM klima_senzory
+            WHERE cas >= %s AND cas <= %s
+            GROUP BY date_trunc('{interval.split()[1]}', cas)
             ORDER BY cas ASC;
-        """)
+        """, (start_dt, end_dt))
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        
+
         response_data = {"iso_casy": [], "teploty": [], "vlhkosti": []}
         for row in rows:
             if isinstance(row['cas'], datetime):
@@ -1299,7 +1350,7 @@ def get_historie():
                 response_data["iso_casy"].append(iso_cas)
                 response_data["teploty"].append(float(row['teplota']))
                 response_data["vlhkosti"].append(float(row['vlhkost']))
-                
+
         return jsonify(response_data)
     except Exception as e:
         return jsonify({"chyba": str(e)}), 500
@@ -1379,6 +1430,20 @@ nohup python3 ~/senzor_postgres.py --break-system-packages > ~/senzor.log 2>&1 &
 ```
 Web nám potom běží na *localhost:5000*
 
+Problém s grafem opraven
+Kód pro InfluxDB nepotřeboval mít pervně určenou strukturu protože InfluxDB je stavěn na měření a zápis dat ale PostgreSQL je univerzální databáze a není přímo určena na měření takže bylo potřeba nastavit 
+Místo "dej mi posledních 1000 řádků" jsem řekl databázi "dej mi **průměr za každou hodinu**".
 
+Změna z 
+SELECT cas, teplota, vlhkost 
+FROM klima_senzory 
+ORDER BY cas DESC 
+LIMIT 1000
+
+Na 
+SELECT date_trunc('hour', cas), AVG(teplota), AVG(vlhkost)
+FROM klima_senzory
+GROUP BY date_trunc('hour', cas)
+ORDER BY cas ASC
 
 
