@@ -1167,8 +1167,209 @@ setInterval(() => { if (!vlastni) načtiPeriod(activePeriodMs); }, 30_000);
 
 ```
 
+## Bonus: Webová aplikace přes databázi PostgreSQL
 
+Předem chci upozornit že přes InfluxDB je to snažší a lepší dle mého názoru. 
+Budeme používat frontend z předchozí webové aplikace určené pro influx.
+Musíme nainstalovat Docker
+``` bash
+sudo apt update
 
+curl -sSL https://get.docker.com | sh
+
+sudo usermod -aG docker $USER
+pip install psycopg2-binary smbus2 --break-system-packages
+```
+Teď doporučuji restartovat systém *sudo reboot*
+
+Příprava složek
+``` bash
+mkdir -p ~/postgre/templates && mkdir -p ~/postgre/init-db && cd ~/postgre
+```
+Vytvoříme soubor docker-compose.yml
+``` bash
+cat << 'EOF' > docker-compose.yml
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: novyucet
+      POSTGRES_PASSWORD: Pardubice2021
+      POSTGRES_DB: moje_databaze
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    container_name: flask_app
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+EOF
+```
+Vytvoříme skript pro automatikcé spouštění a vytvoření tabulky pro data 
+``` bash
+cat << 'EOF' > init-db/init.sql
+CREATE TABLE IF NOT EXISTS klima_senzory (
+    id SERIAL PRIMARY KEY,
+    cas TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    teplota NUMERIC(5,2),
+    vlhkost NUMERIC(5,2)
+);
+EOF
+ ```
+Backend: 
+```python
+cat << 'EOF' > app.py
+from flask import Flask, jsonify, render_template
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from datetime import datetime
+
+app = Flask(__name__)
+
+DB_CONFIG = {
+    "host": "db",
+    "database": "moje_databaze",
+    "user": "novyucet",
+    "password": "Pardubice2021",
+    "port": 5432
+}
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/api/data')
+def get_data():
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT teplota, vlhkost FROM klima_senzory ORDER BY cas DESC LIMIT 1;")
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        if row:
+            return jsonify(row)
+        return jsonify({"teplota": 0, "vlhkost": 0})
+    except Exception as e:
+        return jsonify({"chyba": str(e)}), 500
+
+@app.route('/api/historie')
+def get_historie():
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT cas, teplota, vlhkost 
+            FROM (
+                SELECT cas, teplota, vlhkost 
+                FROM klima_senzory 
+                ORDER BY cas DESC 
+                LIMIT 1000
+            ) sub 
+            ORDER BY cas ASC;
+        """)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        response_data = {"iso_casy": [], "teploty": [], "vlhkosti": []}
+        for row in rows:
+            if isinstance(row['cas'], datetime):
+                iso_cas = row['cas'].isoformat().replace('+00:00', 'Z')
+                response_data["iso_casy"].append(iso_cas)
+                response_data["teploty"].append(float(row['teplota']))
+                response_data["vlhkosti"].append(float(row['vlhkost']))
+                
+        return jsonify(response_data)
+    except Exception as e:
+        return jsonify({"chyba": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+EOF
+```
+Soubor pro zabalení webu do Dock kontejneru: 
+``` bash
+echo -e "Flask\npsycopg2-binary" > requirements.txt
+```
+``` bash
+cat << 'EOF' > Dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "app.py"]
+EOF
+```
+Vytvoříme script pro čtení ze senzoru: 
+``` python
+cat << 'EOF' > ~/senzor_postgres.py
+import time
+from smbus2 import SMBus
+import psycopg2
+
+DB_CONFIG = {
+    "host": "127.0.0.1",
+    "database": "moje_databaze",
+    "user": "novyucet",
+    "password": "Pardubice2021",
+    "port": 5432
+}
+
+I2C_ADDRESS = 0x44
+
+def cti_sht3x():
+    with SMBus(1) as bus:
+        bus.write_i2c_block_data(I2C_ADDRESS, 0x2C, [0x06])
+        time.sleep(0.05)
+        data = bus.read_i2c_block_data(I2C_ADDRESS, 0x00, 6)
+        raw_temp = (data[0] << 8) + data[1]
+        teplota = -45 + (175 * raw_temp / 65535.0)
+        raw_humidity = (data[3] << 8) + data[4]
+        vlhkost = 100 * raw_humidity / 65535.0
+        return teplota, vlhkost
+
+try:
+    while True:
+        temp, hum = cti_sht3x()
+        try:
+            conn = psycopg2.connect(**DB_CONFIG)
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO klima_senzory (teplota, vlhkost) VALUES (%s, %s);",
+                (round(temp, 2), round(hum, 2))
+            )
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception:
+            pass
+        time.sleep(2)
+except KeyboardInterrupt:
+    pass
+EOF
+``` bash
+a zkusíme spustit 
+cd ~/postgre
+docker compose up -d --build
+
+# Potom
+nohup python3 ~/senzor_postgres.py --break-system-packages > ~/senzor.log 2>&1 &
+```
+Web nám potom běží na *localhost:500*
 
 
 
