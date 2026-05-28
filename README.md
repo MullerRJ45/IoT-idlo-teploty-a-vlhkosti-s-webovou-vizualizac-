@@ -1435,15 +1435,18 @@ Kód pro InfluxDB nepotřeboval mít pervně určenou strukturu protože InfluxD
 Místo "dej mi posledních 1000 řádků" jsem řekl databázi "dej mi **průměr za každou hodinu**".
 
 Změna z 
+``` python
 SELECT cas, teplota, vlhkost 
 FROM klima_senzory 
 ORDER BY cas DESC 
 LIMIT 1000
+```
+na 
 
-Na 
+``` python
 SELECT date_trunc('hour', cas), AVG(teplota), AVG(vlhkost)
 FROM klima_senzory
 GROUP BY date_trunc('hour', cas)
 ORDER BY cas ASC
-
+```
 
