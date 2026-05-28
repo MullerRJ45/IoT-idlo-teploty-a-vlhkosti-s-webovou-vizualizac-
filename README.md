@@ -1170,6 +1170,13 @@ setInterval(() => { if (!vlastni) načtiPeriod(activePeriodMs); }, 30_000);
 ## Bonus: Webová aplikace přes databázi PostgreSQL
 
 Předem chci upozornit že přes InfluxDB je to snažší a lepší dle mého názoru. 
+Problém je ten že InfluxDB je Time-Series databáze zatím co Postgres je relační
+
+InfluxDB je od základu navržená výhradně na ukládání dat v čase (metriky ze senzorů, logy). 
+InfluxDB dává čistá a optimalizovaná data.
+
+PostgreSQL je klasická relační databáze (tabulky, řádky, sloupce). PostgreSQL nemá přímo určený typ dat. 
+
 Budeme používat frontend z předchozí webové aplikace určené pro influx.
 Musíme nainstalovat Docker
 ``` bash
@@ -1195,8 +1202,8 @@ services:
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: novyucet
-      POSTGRES_PASSWORD: Pardubice2021
+      POSTGRES_USER: 
+      POSTGRES_PASSWORD: 
       POSTGRES_DB: moje_databaze
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -1241,8 +1248,8 @@ app = Flask(__name__)
 DB_CONFIG = {
     "host": "db",
     "database": "moje_databaze",
-    "user": "novyucet",
-    "password": "Pardubice2021",
+    "user": "",
+    "password": "",
     "port": 5432
 }
 
@@ -1324,8 +1331,8 @@ import psycopg2
 DB_CONFIG = {
     "host": "127.0.0.1",
     "database": "moje_databaze",
-    "user": "novyucet",
-    "password": "Pardubice2021",
+    "user": "",
+    "password": "",
     "port": 5432
 }
 
@@ -1369,7 +1376,7 @@ docker compose up -d --build
 # Potom
 nohup python3 ~/senzor_postgres.py --break-system-packages > ~/senzor.log 2>&1 &
 ```
-Web nám potom běží na *localhost:500*
+Web nám potom běží na *localhost:5000*
 
 
 
