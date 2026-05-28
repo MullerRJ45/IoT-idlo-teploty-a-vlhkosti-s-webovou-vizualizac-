@@ -1163,7 +1163,7 @@ setInterval(aktual, 3_000);
 setInterval(() => { if (!vlastni) načtiPeriod(activePeriodMs); }, 30_000);
 </script>
 </body>
-</html>
+</html> 
 
 ```
 
